@@ -49,7 +49,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'foodonline_main.urls'
+ROOT_URLCONF = 'FarmTech.urls'
 
 TEMPLATES = [
     {
@@ -67,7 +67,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'foodonline_main.wsgi.application'
+WSGI_APPLICATION = 'FarmTech.wsgi.application'
 
 
 # Database
@@ -122,7 +122,7 @@ USE_TZ = True
 STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR /'static'
 STATICFILES_DIRS = [
-    'foodonline_main/static'
+    'FarmTech/static'
 ]
 
 # Default primary key field type
