@@ -4,6 +4,7 @@ from django.contrib.auth.admin import UserAdmin           # Make the password un
 
 
 
+
 # Register your models here.
 
 class CustomerUserAdmin(UserAdmin):                                         # Make the password uneditable in the admin panel
@@ -12,7 +13,8 @@ class CustomerUserAdmin(UserAdmin):                                         # Ma
     filter_horizontal = ()
     list_filter = ()
     fieldsets =()
-    
+ 
+
 
 admin.site.register(User, CustomerUserAdmin)              # Makes the user admin visible on the admin panel
 admin.site.register(UserProfile)

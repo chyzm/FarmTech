@@ -141,3 +141,11 @@ AUTH_USER_MODEL = 'accounts.User'   #needed for the first line in the user profi
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR /'media'
+
+#for message alerts for errors
+from django.contrib.messages import constants as messages
+
+MESSAGE_TAGS = {
+    messages.ERROR: "danger",
+   
+}
