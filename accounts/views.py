@@ -1,14 +1,21 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
+from accounts.utils import detectUser
 from vendor.forms import vendorform
 from .forms import UserForm
 from .models import User, UserProfile
-from django.contrib import messages
+from django.contrib import messages, auth
+from django.contrib.auth.decorators import login_required
 
 # Create your views here
 
 def registerUser(request):
-    if request.method == 'POST':
+     # Checks if the user is already logged in
+    if request.user.is_authenticated:
+            messages.warning(request, 'You are already logged in!')
+            return redirect('dashboard')
+        
+    elif request.method == 'POST':
         print(request.POST)
         form = UserForm(request.POST)
         if form.is_valid():
@@ -37,7 +44,12 @@ def registerUser(request):
 # For vendor resgistration
 
 def registerVendor(request):
-    if request.method  == 'POST':
+     # Checks if the user is already logged in
+    if request.user.is_authenticated:
+            messages.warning(request, 'You are already logged in!')
+            return redirect('dashboard')
+        
+    elif request.method  == 'POST':
         # store the data and create the user 
         form = UserForm(request.POST)
         v_form = vendorform(request.POST, request.FILES) # request.FILES because vendors will be uploading a file
@@ -87,3 +99,61 @@ def registerVendor(request):
     
     return render(request, 'accounts/registerVendor.html', context)
 
+
+# For login
+
+def login(request):
+    
+    # Checks if the user is already logged in
+    if request.user.is_authenticated:
+            messages.warning(request, 'You are already logged in!')
+            return redirect('myAccount')
+        
+        # logs in the credentials if correct
+    elif request.method == 'POST':
+        email = request.POST['email']
+        password = request.POST['password']
+        
+        user = auth.authenticate(email=email, password=password)
+        
+        #if user credentials are correct
+        if user is not None:
+            auth.login(request, user)
+            messages.success(request, 'You are now logged in!')
+            return redirect('myAccount')
+        
+        else:
+            messages.error(request, 'Invalid username or password')
+            return redirect('login')
+    return render(request, 'accounts/login.html')
+
+
+
+# For logout
+
+def logout(request):
+    auth.logout(request)
+    messages.info(request, 'logged out!')
+    return redirect('login')
+
+
+
+# My Account
+
+@login_required(login_url='login')
+def myAccount(request):
+    user = request.user
+    redirectUrl = detectUser(user)
+    return redirect(redirectUrl)
+
+
+# For dashboard
+@login_required(login_url='login')
+def customerDashboard(request):
+     return render(request, 'accounts/customerDashboard.html')
+ 
+ 
+ 
+@login_required(login_url='login')
+def farmDashboard(request):
+     return render(request, 'accounts/farmDashboard.html')

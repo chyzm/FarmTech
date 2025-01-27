@@ -3,8 +3,6 @@ from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from django.conf import settings
 
 
-
-
 class UserManager(BaseUserManager):
     
     # This is for clients creating accounts
@@ -88,6 +86,15 @@ class User(AbstractBaseUser):
     
     def has_module_perms(self, app_label):
         return True
+    
+    # Setting restritions for the customer and Farm, the directs them to the right dashboard
+    def get_role(self):
+        if self.role == 1:
+            user_role = 'Farm'
+            return user_role
+        elif self.role == 2:
+            user_role = 'Customer'
+            return user_role
         
     # create user registration form 
     
