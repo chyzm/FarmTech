@@ -5,9 +5,29 @@ from vendor.forms import vendorform
 from .forms import UserForm
 from .models import User, UserProfile
 from django.contrib import messages, auth
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.core.exceptions import PermissionDenied
 
-# Create your views here
+# restrict farm from accessing customer page
+def check_role_farm(user):
+    if user.role == 1:
+        return True
+    
+    else:
+        raise PermissionDenied
+
+
+# restrict customer from accessing farm page
+def check_role_customer(user):
+    if user.role == 2:
+        return True
+    
+    else:
+        raise PermissionDenied
+
+
+
+
 
 def registerUser(request):
      # Checks if the user is already logged in
@@ -102,29 +122,42 @@ def registerVendor(request):
 
 # For login
 
+from django.shortcuts import render, redirect
+from django.contrib import messages, auth
+from django.contrib.auth.decorators import login_required
+
 def login(request):
-    
     # Checks if the user is already logged in
     if request.user.is_authenticated:
-            messages.warning(request, 'You are already logged in!')
-            return redirect('myAccount')
+        messages.warning(request, 'You are already logged in!')
+        return redirect('myAccount')  # Redirect to the user's account page
+
+    # Logs in the user if credentials are correct
+    if request.method == 'POST':
+        email = request.POST.get('email')  # Use .get() to avoid KeyError
+        password = request.POST.get('password')  # Use .get() to avoid KeyError
+
+        # Authenticate the user
+        user = auth.authenticate(request, username=email, password=password)
+
+        # If user credentials are correct
         
-        # logs in the credentials if correct
-    elif request.method == 'POST':
-        email = request.POST['email']
-        password = request.POST['password']
-        
-        user = auth.authenticate(email=email, password=password)
-        
-        #if user credentials are correct
         if user is not None:
             auth.login(request, user)
             messages.success(request, 'You are now logged in!')
-            return redirect('myAccount')
+            
+            # Redirect based on user role
+            if user.role == 1:  # Farmer
+                return redirect('farmDashboard')   
+            elif user.role == 2:   # Customer
+                return redirect('customerDashboard')
+            
         
         else:
-            messages.error(request, 'Invalid username or password')
-            return redirect('login')
+            messages.error(request, 'Invalid email or password')
+            return redirect('login')  # Redirect back to the login page
+
+    # Render the login page for GET requests
     return render(request, 'accounts/login.html')
 
 
@@ -149,11 +182,13 @@ def myAccount(request):
 
 # For dashboard
 @login_required(login_url='login')
+@user_passes_test(check_role_customer)
 def customerDashboard(request):
      return render(request, 'accounts/customerDashboard.html')
  
  
  
 @login_required(login_url='login')
+@user_passes_test(check_role_farm)
 def farmDashboard(request):
      return render(request, 'accounts/farmDashboard.html')
